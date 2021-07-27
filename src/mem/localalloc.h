@@ -286,6 +286,30 @@ namespace snmalloc
       // local_cache.stats.sta rt();
     }
 
+    // Alternative initialization when the CoreAllocator is allocated outside of
+    // the pools. This needs to be called before lazy initialization has a
+    // chance to execute.
+    void init(CoreAlloc* c)
+    {
+      // Initialise the global allocator structures
+      handle.ensure_init();
+
+      // Should only be called if the allocator has not been initialised.
+      SNMALLOC_ASSERT(core_alloc == nullptr);
+
+      // Initialize an allocator for this thread.
+      new (c) CoreAlloc(&(this->local_cache), handle);
+
+      // Attach to it.
+      c->attach(&local_cache);
+      core_alloc = c;
+#ifdef SNMALLOC_TRACING
+      std::cout << "init(): core_alloc=" << core_alloc << "@" << &local_cache
+                << std::endl;
+#endif
+      // local_cache.stats.sta rt();
+    }
+
     // Return all state in the fast allocator and release the underlying
     // core allocator.  This is used during teardown to empty the thread
     // local state.
