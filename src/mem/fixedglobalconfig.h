@@ -11,13 +11,11 @@ namespace snmalloc
   /**
    * A single fixed address range allocator configuration
    */
-  template<
-    SNMALLOC_CONCEPT(ConceptPAL) PAL,
-    typename BackendTemplate = BackendAllocator<PAL, true>>
+  template<SNMALLOC_CONCEPT(ConceptPAL) PAL>
   class FixedGlobals : public CommonConfig
   {
   public:
-    using Backend = BackendTemplate;
+    using Backend = BackendAllocator<PAL, true>;
 
   private:
     inline static typename Backend::GlobalState backend_state;
@@ -70,9 +68,6 @@ namespace snmalloc
 
     static void init(void* base, size_t length)
     {
-      // Initialise key for remote deallocation lists
-      key_global = FreeListKey(get_entropy64<PAL>());
-
       get_backend_state().init(base, length);
     }
 
